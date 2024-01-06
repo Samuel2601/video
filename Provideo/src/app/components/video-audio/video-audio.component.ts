@@ -14,6 +14,12 @@ export class VideoAudioComponent {
     this._adminService.descargarAudio(videoPath).subscribe(
       (response) => {
         console.log('Extracción de audio completa', response);
+        if(response.listaPath){
+          response.listaPath.forEach((element:any) => {
+            console.log(element.nombre);
+            this.descargarArchivo(element.nombre);
+          });
+        }   
       },
       (error) => {
         console.error('Error durante la extracción de audio', error);
@@ -22,14 +28,27 @@ export class VideoAudioComponent {
   }
 
   descargarArchivo(archivo: string): void {
-    const archivoPath = '/ruta/al/archivo.mp3'; // Reemplaza esto con la ruta correcta
+    const archivoPath = archivo; // Reemplaza esto con la ruta correcta
     this._adminService.descargarArchivo(archivoPath).subscribe(
-      (response) => {
-        console.log('Descarga de archivo completa', response);
+      (data: Blob) => {
+        const url = window.URL.createObjectURL(data);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = archivoPath;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        this.borrar(archivoPath);
       },
-      (error) => {
-        console.error('Error durante la descarga del archivo', error);
+      error => {
+        console.error('Error al descargar el archivo:', error);
       }
     );
+  }
+  borrar(archivo: string){
+    this._adminService.borrarArchivo(archivo).subscribe(reposne=>{
+      console.log(reposne);
+    });
   }
 }
