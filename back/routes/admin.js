@@ -12,7 +12,7 @@ var path = multiparty({uploadDir: './uploads/instituciones'});
 api.post('/descargarAudio', AdminController.descargarAudio);
 
 // Ruta para descargar un archivo
-api.get('/descargarArchivo/:nombre', AdminController.descargarArchivo);
+api.get('/descargarArchivo/:id', AdminController.descargarArchivo);
 
-api.delete('/borrarArchivo/:nombre', AdminController.borrarArchivo);
+api.delete('/borrarArchivo/:id', AdminController.borrarArchivo);
 module.exports = api;

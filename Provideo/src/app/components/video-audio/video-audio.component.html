@@ -1,6 +1,57 @@
-<div>
-    <label for="urlInput">URL del Video:</label>
-    <input id="urlInput" [(ngModel)]="videoUrl" placeholder="Ingrese la URL del video">
-  
-    <button (click)="descargarAudio()">Descargar Audio</button>
-  </div>
+<div class="container">
+    <div class="container-fluid">
+      <div class="card">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-3" >
+              <div class="form-floating">
+                <select class="form-select" id="floatingSelect" aria-label="Floating label select example" [(ngModel)]="rangoSeleccionado">
+                  <option selected disabled>Selecciona un Rango</option>
+                  <option value="1">1</option>
+                  <option value="10" *ngIf="onlist">10</option>
+                  <option value="20" *ngIf="onlist">20</option>
+                  <option value="30" *ngIf="onlist">30</option>
+                </select>
+                <label for="floatingSelect">Rango de Descarga</label>
+              </div>
+            </div>
+          
+            <div class="col-md-3">
+              <div class="form-floating">
+                <select class="form-select" id="validationCustom04" required [(ngModel)]="formatoSeleccionado">
+                  <option selected disabled value="">Selecciona un Formato</option>
+                  <option value="1">Mejor Audio</option>
+                  <option value="2">Mejor Video</option>
+                  <option value="3">Mejor Audio y Video</option>
+                </select>
+                <label for="validationCustom04">Tipo de Formato</label>
+              </div>
+            </div>
+
+            <div class="col-auto">
+              <div class="form-floating">
+                <select class="form-select" id="platformSelect" [(ngModel)]="plataformaSeleccionada">
+                  <option selected disabled>Selecciona una Plataforma</option>
+                  <option value="pc">Descargar para PC</option>
+                  <option value="movil">Descargar para Dispositivo Móvil</option>
+                </select>
+                <label for="platformSelect">Plataforma de Descarga</label>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row g-3">
+            <div class="mb-3">
+              <label for="urlInput" class="form-label">URL del Video:</label>
+              <input id="urlInput" class="form-control" [(ngModel)]="videoUrl" placeholder="Ingrese la URL del video" (change)="onUrlChange()">
+            </div>
+            <div class="col-auto">
+              <button (click)="descargarAudio()" class="btn btn-primary mb-3">Descargar Audio</button>
+            </div>            
+          </div>          
+        </div>        
+      </div>
+      <div>
+    </div>
+</div>
+
