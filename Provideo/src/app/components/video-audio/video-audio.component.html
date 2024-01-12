@@ -1,4 +1,4 @@
-<div class="container">
+<div class="container" *ngIf="listformat.length<=0">
     <div class="container-fluid">
       <div class="card">
         <div class="card-body">
@@ -14,22 +14,51 @@
                 </select>
                 <label for="floatingSelect">Rango de Descarga</label>
               </div>
-            </div>
-          
+            </div>  
+        </div> 
+        <div class="row g-3">
+          <div class="mb-3">
+            <label for="urlInput" class="form-label">URL del Video:</label>
+            <input id="urlInput" class="form-control" [(ngModel)]="videoUrl" placeholder="Ingrese la URL del video" (change)="onUrlChange()">
+          </div>
+          <div class="col-auto">
+            <button (click)="descargarAudio()" class="btn btn-primary mb-3">Descargar Audio</button>
+          </div>            
+        </div>        
+        </div>      
+      </div>
+    </div>
+</div>
+    <div class="container" *ngIf="listformat.length>0">
+      <div class="card">        
+        <div class="card-body">
+
+          <h4 class="card-title">
+            URL: {{videoUrl}}
+          </h4>
+          <h5>
+            Video: {{info.title}} <ng-container *ngIf="rangoSeleccionado>1">Rango:</ng-container>  <span *ngIf="rangoSeleccionado>1" class="badge text-bg-light">(1-{{rangoSeleccionado}})</span>
+          </h5>
+          <br>
+          <div class="row">
             <div class="col-md-3">
               <div class="form-floating">
-                <select class="form-select" id="validationCustom04" required [(ngModel)]="formatoSeleccionado">
+                <select class="form-select" id="validationCustom04" required [(ngModel)]="selectformat">
                   <option selected disabled value="">Selecciona un Formato</option>
-                  <option value="1">Mejor Audio</option>
-                  <option value="2">Mejor Video</option>
-                  <option value="3">Mejor Audio y Video</option>
+                  <ng-container *ngIf="listformat">
+                    <ng-container *ngFor="let item of listformat;let i = index">
+                      <option value="{{i}}">{{item.format}} ({{item.ext}}) 
+                        <span *ngIf="item.filesize" class="badge text-bg-light">{{ convertirBytesAMegabytes(item.filesize) }}</span>
+                      </option>
+                    </ng-container>
+                  </ng-container>
+                  
                 </select>
                 <label for="validationCustom04">Tipo de Formato</label>
               </div>
             </div>
-
-            <div class="col-auto">
-              <div class="form-floating">
+            <div class="col-auto" *ngIf="listformat&&selectformat">
+              <div class="form-floating" *ngIf="listformat[selectformat].resolution=='audio only'">
                 <select class="form-select" id="platformSelect" [(ngModel)]="plataformaSeleccionada">
                   <option selected disabled>Selecciona una Plataforma</option>
                   <option value="pc">Descargar para PC</option>
@@ -38,20 +67,239 @@
                 <label for="platformSelect">Plataforma de Descarga</label>
               </div>
             </div>
+            <div class="col-auto">
+              <button (click)="descarga()" class="btn btn-primary mb-3">Descargar</button>
+            </div> 
           </div>
           
-          <div class="row g-3">
-            <div class="mb-3">
-              <label for="urlInput" class="form-label">URL del Video:</label>
-              <input id="urlInput" class="form-control" [(ngModel)]="videoUrl" placeholder="Ingrese la URL del video" (change)="onUrlChange()">
-            </div>
-            <div class="col-auto">
-              <button (click)="descargarAudio()" class="btn btn-primary mb-3">Descargar Audio</button>
-            </div>            
-          </div>          
-        </div>        
+    
+          <div class="row">
+            <ol class="list-group list-group-flush">
+              <li class="list-group-item">
+                <p>
+                  <strong>Formato sb3, sb2, sb1, sb0:</strong>
+                </p>
+                <ul>
+                  <li>
+                    <strong>Nota:</strong> Storyboard
+                  </li>
+                  <li>
+                    <strong>Extensión:</strong> mhtml
+                  </li>
+                  <li>
+                    <strong>Resolución:</strong> Varía (48x27, 80x45, 160x90, 320x180)
+                  </li>
+                  <li>
+                    <strong>Bitrate:</strong> Null (no especificado)
+                  </li>
+                </ul>
+                <p>Estos formatos parecen estar relacionados con storyboard
+                  (historias visuales) y tienen una extensión mhtml.
+                  La resolución varía en cada formato, pero el bitrate no está especificado.
+                </p>
+              </li>
+              <li class="list-group-item">
+                <p>
+                  <strong>Formato 233, 234:</strong>
+                </p>
+                <ul>
+                  <li>
+                    <strong>Nota:</strong> Default
+                  </li>
+                  <li>
+                    <strong>Extensión:</strong> mp4
+                  </li>
+                  <li>
+                    <strong>Resolución:</strong> Audio only
+                  </li>
+                  <li>
+                    <strong>Bitrate:</strong> Null (no especificado)
+                  </li>
+                </ul>
+                <p>Estos formatos son para archivos de audio en formato MP4.
+                  La resolución está marcada como "audio only", 
+                  lo que indica que estos formatos son específicamente para 
+                  archivos de audio, y el bitrate no está especificado.
+                </p>
+              </li>
+              <li class="list-group-item">
+                  <p>
+                    <strong>Formato 599, 600:</strong>
+                  </p>
+                  <ul>
+                    <li>
+                      <strong>Nota:</strong> Ultralow
+                    </li>
+                    <li>
+                      <strong>Extensión:</strong> m4a (599), webm (600)
+                    </li>
+                    <li>
+                      <strong>Resolución:</strong> Audio only
+                    </li>
+                    <li>
+                      <strong>Bitrate:</strong> Especificado (30.808 para m4a, 35.481 para webm)
+                    </li>
+                  </ul>
+                  <p>
+                    Estos formatos también son para archivos de audio, pero se especifica un bitrate ultrabajo.
+                  </p>
+              </li>
+              <li class="list-group-item">
+                  <p>
+                    <strong>Formato 139, 249, 250, 140, 251:</strong>
+                  </p>
+                  <ul>
+                    <li>
+                      <strong>Nota:</strong> Low (139, 249, 250), Medium (140, 251)
+                    </li>
+                    <li>
+                      <strong>Extensión:</strong> m4a (140), webm (249, 250, 251)
+                    </li>
+                    <li>
+                      <strong>Resolución:</strong> Audio only
+                    </li>
+                    <li>
+                      <strong>Bitrate:</strong> Especificado
+                    </li>
+                  </ul>
+                  <p>Estos formatos son para archivos de audio con calidades
+                    bajas o medias, con bitrates específicos.
+                  </p>
+              </li>
+              <li class="list-group-item">
+                  <p>
+                    <strong>Formato 597, 602, 598, 394, 269, 160, 603, 278:</strong>
+                  </p>
+                  <ul>
+                    <li>
+                      <strong>Nota:</strong> Varios, incluyendo 144p, undefined
+                    </li>
+                    <li>
+                      <strong>Extensión:</strong> mp4 (597, 602, 394, 160, 603), webm (598, 269, 278)
+                    </li>
+                    <li>
+                      <strong>Resolución:</strong> 256x144
+                    </li>
+                    <li>
+                      <strong>Bitrate:</strong> Especificado
+                    </li>
+                  </ul>
+                  <p>Estos formatos son para videos con una resolución de 144p
+                    y algunos tienen una etiqueta "undefined". La extensión y el bitrate varían.
+                    </p>
+              </li>
+              <li class="list-group-item">
+                    <p>
+                      <strong>Formato 395, 229, 133, 604, 242:</strong>
+                    </p>
+                    <ul>
+                      <li>
+                        <strong>Nota:</strong> Varios, incluyendo 240p, undefined
+                      </li>
+                      <li>
+                        <strong>Extensión:</strong> mp4 (395, 229, 133, 604), webm (242)
+                      </li>
+                      <li>
+                        <strong>Resolución:</strong> 426x240
+                      </li>
+                      <li>
+                        <strong>Bitrate:</strong> Especificado
+                      </li>
+                    </ul>
+                    <p>Estos formatos son para videos con una resolución de 240p y algunos 
+                      tienen una etiqueta "undefined".
+                    </p>
+              </li>
+              <li class="list-group-item">
+                    <p>
+                      <strong>Formato 396, 230, 134, 18, 605, 243:</strong>
+                    </p>
+                    <ul>
+                      <li>
+                        <strong>Nota:</strong> Varios, incluyendo 360p, undefined
+                      </li>
+                      <li>
+                        <strong>Extensión:</strong> mp4 (396, 230, 134, 18, 605), webm (243)
+                      </li>
+                      <li>
+                        <strong>Resolución:</strong> 640x360
+                      </li>
+                      <li>
+                        <strong>Bitrate:</strong> Especificado
+                      </li>
+                    </ul>
+                    <p>Estos formatos son para videos con una resolución de 360p y 
+                      algunos tienen una etiqueta "undefined".
+                    </p>
+              </li>
+              <li class="list-group-item">
+                    <p>
+                      <strong>Formato 397, 231, 135, 606, 244:</strong>
+                    </p>
+                    <ul>
+                      <li>
+                        <strong>Nota:</strong> Varios, incluyendo 480p, undefined
+                      </li>
+                      <li>
+                        <strong>Extensión:</strong> mp4 (397, 231, 135, 606), webm (244)
+                      </li>
+                      <li>
+                        <strong>Resolución:</strong> 854x480
+                      </li>
+                      <li>
+                        <strong>Bitrate:</strong> Especificado
+                      </li>
+                    </ul>
+                    <p>Estos formatos son para videos con una resolución de 480p y 
+                      algunos tienen una etiqueta "undefined".
+                    </p>
+              </li>
+              <li class="list-group-item">
+                <p>
+                  <strong>Formato 22, 398, 232, 136, 609, 247:</strong>
+                </p>
+                <ul>
+                  <li>
+                    <strong>Nota:</strong> Varios, incluyendo 720p, undefined
+                  </li>
+                  <li>
+                    <strong>Extensión:</strong> mp4 (22, 398, 232, 136, 609), webm (247)
+                  </li>
+                  <li>
+                    <strong>Resolución:</strong> 1280x720
+                  </li>
+                  <li>
+                    <strong>Bitrate:</strong> Especificado
+                  </li>
+                </ul>
+                <p>Estos formatos son para videos con una resolución de 720p y algunos 
+                  tienen una etiqueta "undefined".
+                </p>
+              </li>
+              <li class="list-group-item">
+                <p>
+                  <strong>Formato 399, 270, 137, 614, 248, 616:</strong>
+                </p>
+                <ul>
+                  <li>
+                    <strong>Nota:</strong> Varios, incluyendo 1080p, Premium
+                  </li>
+                  <li>
+                    <strong>Extensión:</strong> mp4 (399, 270, 137, 614, 616), webm (248)
+                  </li>
+                  <li>
+                    <strong>Resolución:</strong> 1920x1080
+                  </li>
+                  <li>
+                    <strong>Bitrate:</strong> Especificado
+                  </li>
+                </ul>
+                <p>Estos formatos son para videos con una resolución de 1080p, 
+                  y uno de ellos tiene la etiqueta "Premium". El bitrate está 
+                  especificado para cada formato.</p>
+              </li>
+            </ol>
+          </div>
+        </div>
       </div>
-      <div>
     </div>
-</div>
-

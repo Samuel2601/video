@@ -10,7 +10,7 @@ var path = multiparty({uploadDir: './uploads/instituciones'});
 
 // Ruta para descargar el audio
 api.post('/descargarAudio', AdminController.descargarAudio);
-
+api.post('/descargar', AdminController.descargar);
 // Ruta para descargar un archivo
 api.get('/descargarArchivo/:id', AdminController.descargarArchivo);
 

@@ -1,7 +1,6 @@
 import { Component, OnInit} from '@angular/core';
 import { AdminService } from 'src/app/admin.service';
 import { Platform } from '@angular/cdk/platform';
-
 @Component({
   selector: 'app-video-audio',
   templateUrl: './video-audio.component.html',
@@ -13,30 +12,84 @@ export class VideoAudioComponent implements OnInit {
   plataformaSeleccionada: string ='pc';
   videoUrl: string = '';
   onlist=false;
+  listformat:Array<any>=[];
+  selectformat:any;
+  info:any;
+  constructor(private _adminService: AdminService,private platform: Platform) {
 
-  constructor(private _adminService: AdminService,private platform: Platform) {}
+  }
 
   ngOnInit(): void {
     this.verificarTipoDispositivo();
   }
+
   descargarAudio(): void {
     if(this.videoUrl){
       const videoPath = this.videoUrl; // Reemplaza esto con la ruta correcta
-      this._adminService.descargarAudio(videoPath,this.rangoSeleccionado,this.formatoSeleccionado,this.plataformaSeleccionada).subscribe(
+      this._adminService.descargarAudio(videoPath,this.rangoSeleccionado).subscribe(
         (response) => {
           console.log('Extracción de audio completa', response);
-          if(response.listaPath){
-            response.listaPath.forEach((element:any) => {
+          if (response.info && response.info.entries) {
+            this.info = response.info;
+          
+            // Obtener los formatos de la primera entrada
+            const firstEntryFormats = new Set<string>(this.info.entries[0]?.formats || []);
+          
+            // Iterar sobre las demás entradas
+            for (let i = 1; i < this.info.entries.length; i++) {
+              const entryFormats = new Set<string>(this.info.entries[i]?.formats || []);
+          
+              // Intersectar los formatos con los de la primera entrada
+              firstEntryFormats.forEach((firstFormat:any) => {
+                // Buscar un formato en entryFormats que tenga el mismo format_id
+                const matchingFormat = Array.from(entryFormats).find((entryFormat:any) => 
+                entryFormat.format_id == firstFormat.format_id);
               
+                // Si no se encuentra un formato coincidente, eliminarlo de firstEntryFormats
+                if (!matchingFormat) {
+                  console.log(firstFormat);
+                  firstEntryFormats.delete(firstFormat);
+                }
+              });
+            }
+          
+            // Convertir el conjunto de formatos comunes a un array
+            this.listformat = Array.from(firstEntryFormats);
+            console.log(this.listformat);
+            /*
+            response.listaPath.forEach((element:any) => {
+              console.log(element.nombre);
               this.descargarArchivo(element.nombre);
             });
-          }   
+            */
+          }else if(response.info && response.info.formats){
+            this.info = response.info;
+          
+            // Obtener los formatos de la primera entrada
+            const firstEntryFormats = new Set<string>(this.info.formats || []);
+            this.listformat = Array.from(firstEntryFormats);            
+            console.log(this.listformat);
+          } 
+          this.listformat.push({format_id:'',format:'Mejor Video',ext:'mp4'},{format_id:'',format:'Mejor Video',ext:'webm'});
         },
         (error) => {
           console.error('Error durante la extracción de audio', error);
         }
       );
     }    
+  }
+  descarga():void{
+    if(this.info&&this.selectformat){
+      this._adminService.descargar(this.info,this.listformat[this.selectformat],this.plataformaSeleccionada).subscribe((response)=>{
+        if(response.listaPath){
+          console.log(response);
+          response.listaPath.forEach((element:any) => {
+            console.log(element.nombre);
+            this.descargarArchivo(element.nombre);
+          });
+        }
+      });      
+    }
   }
 
   verificarTipoDispositivo() {
@@ -54,6 +107,11 @@ export class VideoAudioComponent implements OnInit {
     } else {
       this.onlist=false;
     }
+  }
+
+  convertirBytesAMegabytes(bytes: number): string {
+    const megabytes = bytes / (1024 * 1024);
+    return megabytes.toFixed(2) + ' MB';
   }
 
   descargarArchivo(archivo: string): void {
@@ -75,10 +133,12 @@ export class VideoAudioComponent implements OnInit {
       }
     );
   }
+
   borrar(archivo: string){
     console.log(archivo);
-    this._adminService.borrarArchivo(archivo).subscribe(reposne=>{
-      console.log(reposne);
+    this._adminService.borrarArchivo(archivo).subscribe(response=>{
+      console.log(response);
     });
   }
+
 }

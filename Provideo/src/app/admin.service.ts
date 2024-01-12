@@ -10,11 +10,17 @@ export class AdminService {
 
   constructor(private http: HttpClient) {}
 
-  descargarAudio(videoPath: string,rangoSeleccionado:number,formatoSeleccionado:number,plataformaSeleccionada:string): Observable<any> {
+  descargarAudio(
+    videoPath: string,
+    rangoSeleccionado:number): Observable<any> {
     const endpoint = `${this.backendDomain}/descargarAudio`;
-    return this.http.post(endpoint, { videoPath:videoPath,rangoSeleccionado:rangoSeleccionado,formatoSeleccionado:formatoSeleccionado,plataformaSeleccionada:plataformaSeleccionada });
+    return this.http.post(endpoint, { videoPath:videoPath,rangoSeleccionado:rangoSeleccionado });
   }
-
+  descargar(info: any,formato:any,dispositivo:any): Observable<any> {
+    const endpoint = `${this.backendDomain}/descargar`;
+    return this.http.post(endpoint, { info:info, formato:formato,dispositivo:dispositivo});
+  }
+  
   descargarArchivo(nombreArchivo: string): Observable<Blob> {
     const url = `${this.backendDomain}/descargarArchivo/${nombreArchivo}`;
     return this.http.get(url, { responseType: 'blob' });
