@@ -55,6 +55,7 @@ export class VideoAudioComponent implements OnInit {
           
             // Convertir el conjunto de formatos comunes a un array
             this.listformat = Array.from(firstEntryFormats);
+            this.listformat.push({format_id:'',format:'Mejor Video',ext:'mp4'},{format_id:'',format:'Mejor Video',ext:'webm'});
             console.log(this.listformat);
             /*
             response.listaPath.forEach((element:any) => {
@@ -67,10 +68,11 @@ export class VideoAudioComponent implements OnInit {
           
             // Obtener los formatos de la primera entrada
             const firstEntryFormats = new Set<string>(this.info.formats || []);
-            this.listformat = Array.from(firstEntryFormats);            
+            this.listformat = Array.from(firstEntryFormats); 
+            this.listformat.push({format_id:'',format:'Mejor Video',ext:'mp4'},{format_id:'',format:'Mejor Video',ext:'webm'});           
             console.log(this.listformat);
           } 
-          this.listformat.push({format_id:'',format:'Mejor Video',ext:'mp4'},{format_id:'',format:'Mejor Video',ext:'webm'});
+          
         },
         (error) => {
           console.error('Error durante la extracción de audio', error);
