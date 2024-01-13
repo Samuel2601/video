@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class AdminService {
-  private backendDomain = 'http://127.0.0.1:4201/api'//'https://ptw2325t-4201.use2.devtunnels.ms/api'//; // Reemplaza esto con el dominio de tu servidor
+  private backendDomain = 'https://1rp5mk0w-4201.use2.devtunnels.ms/api';//'http://127.0.0.1:4201/api'//'https://ptw2325t-4201.use2.devtunnels.ms/api'//; // Reemplaza esto con el dominio de tu servidor
 
   constructor(private http: HttpClient) {}
 

@@ -71,8 +71,7 @@ export class VideoAudioComponent implements OnInit {
             this.listformat = Array.from(firstEntryFormats); 
             this.listformat.push({format_id:'',format:'Mejor Video',ext:'mp4'},{format_id:'',format:'Mejor Video',ext:'webm'});           
             console.log(this.listformat);
-          } 
-          
+          }           
         },
         (error) => {
           console.error('Error durante la extracción de audio', error);
@@ -80,7 +79,9 @@ export class VideoAudioComponent implements OnInit {
       );
     }    
   }
+  loaddw=false;
   descarga():void{
+    this.loaddw=true;
     if(this.info&&this.selectformat){
       this._adminService.descargar(this.info,this.listformat[this.selectformat],this.plataformaSeleccionada).subscribe((response)=>{
         if(response.listaPath){
@@ -89,6 +90,7 @@ export class VideoAudioComponent implements OnInit {
             console.log(element.nombre);
             this.descargarArchivo(element.nombre);
           });
+          this.loaddw=false;
         }
       });      
     }
