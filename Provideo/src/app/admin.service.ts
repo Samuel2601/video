@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class AdminService {
-  private backendDomain = 'https://1rp5mk0w-4201.use2.devtunnels.ms/api';//'http://127.0.0.1:4201/api'//'https://ptw2325t-4201.use2.devtunnels.ms/api'//; // Reemplaza esto con el dominio de tu servidor
+  private backendDomain = 'http://127.0.0.1:4201/api';//'http://127.0.0.1:4201/api'//'https://ptw2325t-4201.use2.devtunnels.ms/api'//; // Reemplaza esto con el dominio de tu servidor
 
   constructor(private http: HttpClient) {}
 
@@ -25,8 +25,8 @@ export class AdminService {
     const url = `${this.backendDomain}/descargarArchivo/${nombreArchivo}`;
     return this.http.get(url, { responseType: 'blob' });
   }
-  borrarArchivo(nombreArchivo: string): Observable<any> {
-    const url = `${this.backendDomain}/borrarArchivo/${nombreArchivo}`;
-    return this.http.delete(url);
+  borrarArchivo(nombreArchivo: any): Observable<any> {
+    const url = `${this.backendDomain}/borrarArchivo`;
+    return this.http.post(url,{ list:nombreArchivo });
   }
 }

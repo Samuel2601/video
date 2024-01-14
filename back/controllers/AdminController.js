@@ -237,25 +237,39 @@ const descargarArchivo = async function (req, res) {
 };
 
 const borrarArchivo = async function (req, res) {
-  if(req.params['id']){
-    const nombreArchivo = encodeURIComponent(req.params['id']);
-    const rutaArchivo = path.join(__dirname, '../descargas/', nombreArchivo);  
-    // Verificar si el archivo existe
-    fs.access(rutaArchivo, fs.constants.F_OK, (err) => {
-        if (err) {
-            res.status(404).json({mensaje:'Archivo no encontrado'});
-        } else {
-            fs.unlink(rutaArchivo, (err) => {
-                if (err) {
-                    res.status(500).json({mensaje:'Error interno del servidor al borrar el archivo'});
-                } else {
-                    res.status(200).json({mensaje:'Archivo borrado exitosamente'});
-                }
-            });
-        }
-    });
-  }  
+  if (req.body.list) {
+    const list = req.body.list;
+    console.log(list);
+    let reslist = [];
+
+    const deleteFile = async (element) => {
+      console.log(element, element.nombre);
+      const nombreArchivo = encodeURIComponent(element.nombre);
+      const rutaArchivo = path.join(__dirname, '../descargas/', nombreArchivo);
+
+      try {
+        await fs.promises.access(rutaArchivo, fs.constants.F_OK);
+        await fs.promises.unlink(rutaArchivo);
+        reslist.push({ message: 'Archivo borrado exitosamente' });
+      } catch (err) {
+        console.error('Error al borrar el archivo:', err);
+        reslist.push({ message: 'Error interno del servidor al borrar el archivo' });
+      }
+    };
+    res.status(200).json({ message: 'Borrando archivos...' });
+
+    await Promise.all(list.map(deleteFile));
+    
+    if (reslist.length > 0) {
+      res.status(200).json({ reslist });
+    } else {
+      res.status(200).json({ message: 'No body list' });
+    }
+  } else {
+    res.status(200).json({ message: 'No body' });
+  }
 };
+
 
 module.exports = {
   descargarAudio,

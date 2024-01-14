@@ -9,8 +9,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 
-import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
-import { ToastModule } from 'ngx-bootstrap/toast';
 
 @NgModule({
   declarations: [
@@ -24,8 +22,6 @@ import { ToastModule } from 'ngx-bootstrap/toast';
     FormsModule,
     ReactiveFormsModule,
     CommonModule,
-    BsDropdownModule.forRoot(),
-    ToastModule.forRoot(),
   ],
   providers: [],
   bootstrap: [AppComponent]

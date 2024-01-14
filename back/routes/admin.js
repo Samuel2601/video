@@ -14,5 +14,5 @@ api.post('/descargar', AdminController.descargar);
 // Ruta para descargar un archivo
 api.get('/descargarArchivo/:id', AdminController.descargarArchivo);
 
-api.delete('/borrarArchivo/:id', AdminController.borrarArchivo);
+api.post('/borrarArchivo', AdminController.borrarArchivo);
 module.exports = api;

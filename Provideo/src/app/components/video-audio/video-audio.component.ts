@@ -1,6 +1,8 @@
 import { Component, OnInit} from '@angular/core';
 import { AdminService } from 'src/app/admin.service';
 import { Platform } from '@angular/cdk/platform';
+import iziToast from 'izitoast';
+
 @Component({
   selector: 'app-video-audio',
   templateUrl: './video-audio.component.html',
@@ -80,19 +82,30 @@ export class VideoAudioComponent implements OnInit {
     }    
   }
   loaddw=false;
-  descarga():void{
-    this.loaddw=true;
-    if(this.info&&this.selectformat){
-      this._adminService.descargar(this.info,this.listformat[this.selectformat],this.plataformaSeleccionada).subscribe((response)=>{
-        if(response.listaPath){
+  listpath:any={}
+  descarga(): void {
+    this.loaddw = true;
+    if (this.info && this.selectformat) {
+      this._adminService.descargar(this.info, this.listformat[this.selectformat], this.plataformaSeleccionada).subscribe((response) => {
+        if (response.listaPath) {
           console.log(response);
-          response.listaPath.forEach((element:any) => {
-            console.log(element.nombre);
-            this.descargarArchivo(element.nombre);
-          });
-          this.loaddw=false;
+          this.listpath = response.listaPath;
+          this.descargarYBorrarArchivos();
         }
-      });      
+      });
+    }
+  }
+  async descargarYBorrarArchivos(): Promise<void> {
+    try {
+      for (const element of this.listpath) {
+        this.descargarArchivo(element.nombre);
+      }
+  
+      this.borrar();
+    } catch (error) {
+      console.error('Error en la descarga o borrado de archivos:', error);
+    } finally {
+      this.loaddw = false;
     }
   }
 
@@ -130,7 +143,6 @@ export class VideoAudioComponent implements OnInit {
         a.click();
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
-        this.borrar(archivoPath);
       },
       error => {
         console.error('Error al descargar el archivo:', error);
@@ -138,11 +150,18 @@ export class VideoAudioComponent implements OnInit {
     );
   }
 
-  borrar(archivo: string){
-    console.log(archivo);
-    this._adminService.borrarArchivo(archivo).subscribe(response=>{
-      console.log(response);
-    });
+  borrar(){
+    if(this.listpath){
+      this._adminService.borrarArchivo(this.listpath).subscribe(response=>{
+        console.log(response);
+        iziToast.show({
+          title: 'SUCCESS',
+          class: 'iziToast-success',
+          position: 'topRight',
+          message: response,
+        });
+      });
+    }  
   }
 
 }
