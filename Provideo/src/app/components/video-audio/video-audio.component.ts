@@ -97,14 +97,17 @@ export class VideoAudioComponent implements OnInit {
   }
   async descargarYBorrarArchivos(): Promise<void> {
     try {
+      let i=0;
       for (const element of this.listpath) {
-        this.descargarArchivo(element.nombre);
+        this.descargarArchivo(element.nombre,i);
+        i++;
       }
   
-      this.borrar();
+      // this.borrar();
     } catch (error) {
       console.error('Error en la descarga o borrado de archivos:', error);
     } finally {
+      //this.borrar();
       this.loaddw = false;
     }
   }
@@ -131,7 +134,8 @@ export class VideoAudioComponent implements OnInit {
     return megabytes.toFixed(2) + ' MB';
   }
 
-  descargarArchivo(archivo: string): void {
+  descargarArchivo(archivo: string,count:number): void {
+    console.log(count);
     const archivoPath = archivo; // Reemplaza esto con la ruta correcta
     this._adminService.descargarArchivo(archivoPath).subscribe(
       (data: Blob) => {
@@ -143,6 +147,9 @@ export class VideoAudioComponent implements OnInit {
         a.click();
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
+        if(count==this.listpath.length-1){
+         // this.borrar();
+        }
       },
       error => {
         console.error('Error al descargar el archivo:', error);

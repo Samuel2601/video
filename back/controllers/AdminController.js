@@ -243,20 +243,24 @@ const borrarArchivo = async function (req, res) {
     let reslist = [];
 
     const deleteFile = async (element) => {
-      console.log(element, element.nombre);
+      
       const nombreArchivo = encodeURIComponent(element.nombre);
       const rutaArchivo = path.join(__dirname, '../descargas/', nombreArchivo);
-
+      console.log("RUTA:",rutaArchivo);
       try {
-        await fs.promises.access(rutaArchivo, fs.constants.F_OK);
-        await fs.promises.unlink(rutaArchivo);
-        reslist.push({ message: 'Archivo borrado exitosamente' });
+        fs.access(rutaArchivo, fs.constants.F_OK,(err)=>{
+          if(err){
+            reslist.push({ message: 'ERROR:'+err });
+          }else{
+            fs.unlink(rutaArchivo);
+            reslist.push({ message: 'Archivo borrado exitosamente' });
+          }
+        });
       } catch (err) {
-        console.error('Error al borrar el archivo:', err);
-        reslist.push({ message: 'Error interno del servidor al borrar el archivo' });
+        reslist.push({ message: 'ERROR:'+err });
       }
     };
-    res.status(200).json({ message: 'Borrando archivos...' });
+    //res.status(200).json({ message: 'Borrando archivos...' });
 
     await Promise.all(list.map(deleteFile));
     
