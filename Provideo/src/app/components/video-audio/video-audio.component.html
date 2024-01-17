@@ -42,6 +42,13 @@
           Video: {{info.title}} <ng-container *ngIf="rangoSeleccionado>1">Rango:</ng-container>  <span *ngIf="rangoSeleccionado>1" class="badge text-bg-light">(1-{{rangoSeleccionado}})</span>
         </h5>
         <br>
+        <div class="row" *ngIf="info.entries">
+          <ul>
+            <ng-container *ngFor="let item of info.entries">
+              <li>{{item.title}}</li>
+            </ng-container>            
+          </ul>
+        </div>
         <div class="row">
           <div class="col-md-3">
             <div class="form-floating">

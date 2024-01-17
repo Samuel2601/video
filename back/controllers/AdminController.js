@@ -3,12 +3,13 @@ var fs = require('fs');
 var path = require('path');
 
 var mongoose = require('mongoose');
-const ffmpeg = require('fluent-ffmpeg');
-const ffmpegPath = path.resolve(__dirname, '../ffmpeg-master-latest-win64-gpl-shared/bin/ffmpeg.exe');
-ffmpeg.setFfmpegPath(ffmpegPath);
+
 // Función para descargar el audio de un video
 const logger = require('progress-estimator')();
 const youtubedl = require('youtube-dl-exec');
+
+const ffmpegPath = require('ffmpeg-static');
+const ffmpeg = require('fluent-ffmpeg');
 
 const descargarAudio = async function (req, res) {
   console.log(req.body);
@@ -28,7 +29,8 @@ async function obtenerInformacionVideo(videoUrl,rangoSeleccionado) {
     const optionsinfo = {
       playlistItems: playlistRange,
       dumpSingleJson: true,
-      format:'bestaudio/best'
+      format:'bestaudio/best',
+      'playlist-reverse': true,
     };    
     const info = await youtubedl(videoUrl,optionsinfo);
     //await logger(info, `Obteniendo información para ${videoUrl}`);
@@ -38,28 +40,7 @@ async function obtenerInformacionVideo(videoUrl,rangoSeleccionado) {
     return {error:error};
   }
 }
-const descargar = async function (req, res) {
-  try {
-    const info = req.body.info;
-    const formato=req.body.formato;
-    const dispositivo=req.body.dispositivo;
-    const listaPath = [];
-    const outputPath = '/descargas/';
-    let ext = formato.ext;
-    let formatext=formato.format_id;
-    if(dispositivo!='pc'){
-      ext='mp3';
-      formatext='bestaudio/best';
-    }else{
-      //formatext='bestvideo+bestaudio/best';
-      //ext='mp4';
-    }
-    
-    
-    if(info && info.entries){
-
-      for (const entry of info.entries) {
-        /*entry.formats.forEach(format => {
+ /*entry.formats.forEach(format => {
           //console.log( format);
           console.log('Formato:', format.format_id);
           console.log('NOTA:',format.format_note);
@@ -68,34 +49,7 @@ const descargar = async function (req, res) {
           console.log('Bitrate:', format.tbr);
           console.log('------------------------');
         });*/
-
-        const entryUrl = entry.webpage_url;
-        const nombreDeseado=encodeURIComponent(entry.title);
-        const options = {
-          noCheckCertificates: true,
-          preferFreeFormats: true,
-          noWarnings: true,          
-          output: outputPath+nombreDeseado+'.'+ext,
-        };
-        if(formatext){
-          options.format = formatext;//'mp4',//formatext,
-        }
-        
-
-        await youtubedl(entryUrl, options)
-        .then(async (output) => {
-            const matches = output.match(/\[download\] Destination: (.+)/);
-            if (matches && matches[1]) {
-                listaPath.push({ nombre: nombreDeseado+'.'+ext });
-            }
-        })
-        .catch((error) => {
-            console.error('Error al descargar:', error);
-        });
-
-    }
-    }else if(info && info.title){
-      /*info.formats.forEach(format => {
+/*info.formats.forEach(format => {
         //console.log( format);
         console.log('Formato:', format.format_id);
         console.log('NOTA:',format.format_note);
@@ -104,35 +58,119 @@ const descargar = async function (req, res) {
         console.log('Bitrate:', format.tbr);
         console.log('------------------------');
       });*/
+const descargar = async function (req, res) {
+  try {
+    const info = req.body.info;
+    const formato = req.body.formato;
+    const dispositivo = req.body.dispositivo;
+    const listaPath = [];
+    const outputPath = '/descargas/';
+    let ext = formato.ext;
+    let formatext = formato.format_id;
+    
+    if (dispositivo !== 'pc') {
+      ext = 'mp3';
+      formatext = 'bestaudio/best';
+    } else {
+      // Si estás descargando para PC, puedes especificar el formato deseado aquí
+      // formatext = 'bestvideo+bestaudio/best';
+      // ext = 'mp4';
+    }
+
+    if (info && info.entries) {
+      for (const entry of info.entries) {
+        const entryUrl = entry.webpage_url;
+        const nombreDeseado = encodeURIComponent(entry.title);
+        const options = {
+          noCheckCertificates: true,
+          preferFreeFormats: true,
+          noWarnings: true,
+          output: outputPath + nombreDeseado + '.' + ext,
+          //embedThumbnail: true,  // Opción para incrustar la miniatura
+        };
+
+        if (formatext) {
+          options.format = formatext;
+        }
+        
+        //options['embed-thumbnail'] = true;
+        await youtubedl(entryUrl, options)
+          .then(async (output) => {
+            const matches = output.match(/\[download\] Destination: (.+)/);
+            //const imageMatch = output.match(/\[ThumbnailsConvertor\] Converting thumbnail "([^"]+)"/);
+            if (matches && matches[1]) {
+              //await incrustarPortada(matches[1],imageMatch[1],'../descargas/end/');
+              listaPath.push({ nombre: nombreDeseado + '.' + ext });
+            }
+          })
+          .catch((error) => {
+            console.error('Error al descargar:', error);
+          });
+      }
+    } else if (info && info.title) {
       const entryUrl = info.webpage_url;
-      const nombreDeseado=encodeURIComponent(info.title);
+      const nombreDeseado = encodeURIComponent(info.title);
       const options = {
         noCheckCertificates: true,
         preferFreeFormats: true,
         noWarnings: true,
-        //format: formatext,
-        output: outputPath+nombreDeseado+'.'+ext,
+        output: outputPath + nombreDeseado + '.' + ext,
+        //embedThumbnail: true,  // Opción para incrustar la miniatura
       };
-      if(formatext){
-          options.format = formatext;//'mp4',//formatext,
-        }
+
+      if (formatext) {
+        options.format = formatext;
+      }
+      
+      //options['embed-thumbnail'] = true;
       await youtubedl(entryUrl, options)
-      .then(async (output) => {
+        .then(async (output) => {
           const matches = output.match(/\[download\] Destination: (.+)/);
+          //const imageMatch = output.match(/\[ThumbnailsConvertor\] Converting thumbnail "([^"]+)"/);
           if (matches && matches[1]) {
-              listaPath.push({ nombre: nombreDeseado+'.'+ext });
+            //await incrustarPortada(matches[1],imageMatch[1],'../descargas/end/');
+            listaPath.push({ nombre: nombreDeseado + '.' + ext });
           }
-      })
-      .catch((error) => {
+        })
+        .catch((error) => {
           console.error('Error al descargar:', error);
-      });
+        });
     }
 
-    res.status(200).json({listaPath:listaPath});
+    res.status(200).json({ listaPath: listaPath });
   } catch (error) {
-    
+    console.error('Error general:', error);
+    res.status(500).json({ error: 'Error en el servidor' });
   }
+};
+const NodeID3 = require('node-id3');
+
+async function incrustarPortada(mp3FilePath, coverPath, outputDirectory) {
+  return new Promise((resolve, reject) => {
+    const tags = {
+      title: 'Título de la canción',
+      artist: 'Artista',
+      album: 'Álbum',
+      image: {
+        mime: 'webp', // Ajusta el tipo MIME según el formato de tu miniatura
+        type: { id: 3, name: 'front cover' },
+        description: 'Portada',
+        imageBuffer: fs.readFileSync(path.join(__dirname, '../', coverPath)),
+      },
+    };
+
+    NodeID3.write(tags, path.join(__dirname, '../', mp3FilePath), (err) => {
+      if (err) {
+        console.error('Error al incrustar la portada:', err);
+        reject(err);
+      } else {
+        console.log('Portada incrustada con éxito en el archivo MP3.');
+        resolve();
+      }
+    });
+  });
 }
+      
 /*
 
     const outputPath = '../descargas/';
@@ -240,29 +278,7 @@ const borrarArchivo = async function (req, res) {
   if (req.body.list) {
     const list = req.body.list;
     console.log(list);
-    let reslist = [];
-
-    const deleteFile = async (element) => {
-      
-      const nombreArchivo = encodeURIComponent(element.nombre);
-      const rutaArchivo = path.join(__dirname, '../descargas/', nombreArchivo);
-      console.log("RUTA:",rutaArchivo);
-      try {
-        fs.access(rutaArchivo, fs.constants.F_OK,(err)=>{
-          if(err){
-            reslist.push({ message: 'ERROR:'+err });
-          }else{
-            fs.unlink(rutaArchivo);
-            reslist.push({ message: 'Archivo borrado exitosamente' });
-          }
-        });
-      } catch (err) {
-        reslist.push({ message: 'ERROR:'+err });
-      }
-    };
-    //res.status(200).json({ message: 'Borrando archivos...' });
-
-    await Promise.all(list.map(deleteFile));
+    let reslist = await Promise.all(list.map(deleteFile));
     
     if (reslist.length > 0) {
       res.status(200).json({ reslist });
@@ -273,6 +289,33 @@ const borrarArchivo = async function (req, res) {
     res.status(200).json({ message: 'No body' });
   }
 };
+
+const accessFile = (rutaArchivo) => {
+  return new Promise((resolve, reject) => {
+    fs.access(rutaArchivo, fs.constants.F_OK, (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+  });
+};
+
+const deleteFile = async (element) => {
+  const nombreArchivo = element.nombre;
+  const rutaArchivo = path.join(__dirname, '../descargas/', nombreArchivo);
+  console.log("RUTA:", rutaArchivo);
+
+  try {
+    await accessFile(rutaArchivo);
+    await fs.promises.unlink(rutaArchivo);
+    return ({ nombre: element.nombre, message: 'Archivo borrado exitosamente' });
+  } catch (err) {
+    return ({ nombre: element.nombre, message: 'ERROR: ' + err.message });
+  }
+};
+
 
 
 module.exports = {

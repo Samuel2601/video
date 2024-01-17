@@ -42,8 +42,8 @@ mongoose.connect('mongodb://127.0.0.1:27017/Madre',{useUnifiedTopology: true, us
     }
 });
 
-app.use(bodyparser.urlencoded({limit: '50mb',extended:true}));
-app.use(bodyparser.json({limit: '50mb', extended: true}));
+app.use(bodyparser.urlencoded({limit: '500mb',extended:true}));
+app.use(bodyparser.json({limit: '500mb', extended: true}));
 
 app.use((req,res,next)=>{
     res.header('Access-Control-Allow-Origin','*'); 

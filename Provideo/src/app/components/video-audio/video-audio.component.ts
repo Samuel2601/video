@@ -148,7 +148,7 @@ export class VideoAudioComponent implements OnInit {
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
         if(count==this.listpath.length-1){
-         // this.borrar();
+          this.borrar();
         }
       },
       error => {
